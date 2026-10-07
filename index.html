@@ -102,6 +102,12 @@
     Dúvidas? Ligue para a Floramar:<br>
     <a href="tel:+553537299000">📞 (35) 3729-9000</a>
     <p class="fonte">App não oficial. Horários conferidos no site floramar.com.br em 07/10/2026.</p>
+    <hr style="margin:20px 0;border:none;border-top:1px solid #ddd;">
+    <p style="font-size:0.7rem;color:#666;">
+      <strong>Proteção de Propriedade Intelectual:</strong> Este código é de uso exclusivo para demonstração e portfólio. 
+      Copia, clonagem ou uso comercial sem autorização escrita são proibidos e sujeitos a ações legais conforme 
+      <a href="/SECURITY.md" target="_blank" style="color:#f5a300;">Lei nº 9.610/1998</a> (Brasil).
+    </p>
   </footer>
 </div>
 
@@ -343,5 +349,36 @@ function selecionar(id) {
   document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
 })();
 </script>
+
+<!-- Pop-up de proteção de propriedade intelectual -->
+<div id="license-popup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;color:#fff;padding:20px 24px;font-family:system-ui,system-ui,Arial,sans-serif;overflow:auto;">
+  <div style="max-width:520px;margin:auto;background:#111;border-radius:12px;padding:24px;line-height:1.5;">
+    <h2 style="margin-bottom:16px;color:#f5a300;">⚠️ Acesso Restrito</h2>
+    <p style="margin-bottom:16px;font-size:0.9rem;">
+      Este repositório é propriedade intelectual de <strong>Silvio Rodrigues Correa Junior</strong>.
+    </p>
+    <p style="margin-bottom:16px;font-size:0.8rem;">
+      <strong>Proibida cópia, clonagem, uso comercial ou institucional sem autorização escrita.</strong>
+    </p>
+    <p style="margin-bottom:16px;font-size:0.8rem;">
+      © 2026 Todos os direitos reservados. <a href="/SECURITY.md" target="_blank" style="color:#f5a300;">Lei nº 9.610/1998</a> (Brasil).
+    </p>
+    <button onclick="fecharPopup()" style="margin-top:24px;width:100%;max-width:200px;background:#0b3d91;color:#fff;border:none;padding:12px;font-size:1rem;cursor:pointer;border-radius:6px;">
+      Entendido
+    </button>
+  </div>
+</div>
+
+<script>
+  function mostrarPopup() {
+    const jaViu = localStorage.getItem('já_viu_popup_licenca');
+    if (jaViu) return;
+    document.getElementById('license-popup').style.display = 'block';
+    localStorage.setItem('já_viu_popup_licenca', '1');
+  }
+  function fecharPopup() { document.getElementById('license-popup').style.display = 'none'; }
+  window.addEventListener('load', mostrarPopup);
+</script>
+
 </body>
 </html>

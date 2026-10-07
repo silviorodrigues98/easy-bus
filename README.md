@@ -1,5 +1,18 @@
 # Meu Ônibus
 
+<img src="https://img.shields.io/badge/License-Proprietary-red" alt="Licença proprietária">
+
+> **⚠️ Aviso Importante:** Este repositório é de propriedade de Silvio Rodrigues Correa Junior.  
+> **Copiar, clonar, modificar ou usar comercialmente sem autorização escrita é proibido** e sujeito a ações legais conforme Lei nº 9.610/1998 (Brasil).  
+>  
+> Acesso público restrito a fins de demonstração, educação e portfólio profissional.
+
+App simples e leve para consultar os horários das linhas de ônibus da **Floramar** direto no celular. Tudo em um único arquivo HTML, sem dependências e sem servidor.
+
+Feito pensando no meu pai idoso, para facilitar e simplificar a visualização dos horários: tela limpa, fonte grande e poucos toques para chegar ao que interessa.
+
+> App não oficial. Os horários são conferidos no site [floramar.com.br](https://floramar.com.br).
+
 App simples e leve para consultar os horários das linhas de ônibus da **Floramar** direto no celular. Tudo em um único arquivo HTML, sem dependências e sem servidor.
 
 Feito pensando no meu pai idoso, para facilitar e simplificar a visualização dos horários: tela limpa, fonte grande e poucos toques para chegar ao que interessa.
@@ -49,3 +62,17 @@ Depois, é só subir o `index.html` atualizado.
 ## Publicação
 
 O app é um site estático: pode ser publicado no [Netlify](https://www.netlify.com), GitHub Pages ou qualquer hospedagem estática — basta enviar o `index.html`.
+
+## Monitoramento de Cópia
+
+Para proteger contra roubo e clonagem não autorizada:
+
+1. **Verificação semanal:** Execute `git log --oneline -10` na pasta do repositório para ver os últimos commits. Qualquer commit estranho ou inesperado deve ser investigado.
+
+2. **GitHub Actions:** Este repositório inclui um fluxo de trabalho `.github/workflows/monitor-copies.yml` que roda toda segunda-feira às 06:00 UTC e registra a atividade recente de git.
+
+3. **Detecção de mirroring:** Monitore se o site `easy-bus.edgeone.dev` aparece em outros domínios sem autorização. Use ferramentas como `whois` ou serviços de detecção de cópia.
+
+4. **Relatórios:** Se encontrar cópias não autorizadas, consulte `SECURITY.md` para as ações legais cabíveis conforme Lei nº 9.610/1998.
+
+5. **Backup seguro:** Mantenha o repositório privado ou com proteção de branch para evitar pushes não autorizados.

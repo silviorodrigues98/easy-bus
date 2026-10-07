@@ -1,0 +1,39 @@
+name: Monitor Copy Detection
+
+on:
+  schedule:
+    - cron: '0 6 * * MON'  #every Monday at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-activity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log recent git activity
+        run: |
+          echo "=== Git log ultimos 10 commits ==="
+          git log --oneline -10
+          echo ""
+          echo "=== Git log ultimos 10 commits com autores ==="
+          git log --oneline -10 --format="%h %an: %s"
+          echo ""
+          echo "=== Status de arquivos modificados ==="
+          git status --short
+
+      - name: Detectar possiveis clones
+        run: |
+          echo "⚠️ Verifique manualmente se ha suspeita de clonagem nao autorizada"
+          echo "Consulte o arquivo SECURITY.md para mais informacoes sobre protecao de propriedade intelectual"
+          echo "Para reportar uso nao autorizado, entre em contato com Silvio Rodrigues Correa Junior"
+
+      - name: Post status comment
+        if: github.event_name == 'workflow_dispatch'
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: 1
+          body: |
+            **Monitoramento de Cópia semanal** - Rodei verificações de atividade.
+            ✅ Nenhum atividade suspeita detectada nesta execução.

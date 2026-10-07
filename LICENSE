@@ -1,0 +1,35 @@
+MIT License
+
+Copyright (c) 2026 Silvio Rodrigues Correa Junior
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+However, the following restrictions apply:
+
+1. This software cannot be used for commercial purposes without explicit written permission from the author.
+2. This software cannot be integrated, cloned, or redistributed by companies, public transportation concessionaires, or government bodies without a formal license or rights cession with the author.
+3. This software cannot be used for institutional purposes without explicit written permission from the author.
+4. Demonstration and educational access to this repository is permitted solely for portfolio and learning purposes.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+Restrições Adicionais (não contempladas pela licença MIT padrão):
+
+- É expressamente proibida a apropriação comercial deste código-fonte.
+- É proibida a cópia, clonagem, integração comercial ou uso institucional sem licença formalizada com o autor.
+- A violação dos direitos autorais está sujeita às sanções da Lei nº 9.609/1998 e Lei nº 9.610/1998 (Brasil).
