@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b3d91">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Meu Ônibus</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --azul: #0b3d91; --azul-claro: #e8efff; --verde: #0b5d27; --verde-claro: #e3f6e8;
+    --vermelho: #a8161a; --texto: #000; --cinza: #3d434b; --borda: #9aa3ae; --fundo: #f2f3f5;
+    --base: 21px;
+  }
+  html { font-size: var(--base); }
+  html.grande { --base: 25px; }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: var(--fundo); color: var(--texto); line-height: 1.35; -webkit-text-size-adjust: 100%; }
+  .app { max-width: 560px; margin: 0 auto; padding: 14px 16px 40px; }
+  button { font: inherit; color: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  button:focus-visible, input:focus-visible { outline: 4px solid #f5a300; outline-offset: 2px; }
+  button:active { transform: scale(0.98); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* Linha escolhida */
+  .btn-linha { width: 100%; min-height: 72px; text-align: left; background: #fff; border: 3px solid var(--azul); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px; }
+  .btn-linha .cod { background: var(--azul); color: #fff; font-weight: 900; font-size: 1.15rem; border-radius: 10px; padding: 6px 10px; flex-shrink: 0; }
+  .btn-linha .nome { font-weight: 800; font-size: 1.1rem; flex: 1; min-width: 0; overflow-wrap: break-word; }
+  .btn-linha .trocar { display: block; margin-top: 2px; font-size: 0.85rem; font-weight: 800; color: var(--azul); text-decoration: underline; }
+
+  /* Cartão principal */
+  .card-prox { margin-top: 18px; background: var(--verde-claro); border: 5px solid var(--verde); border-radius: 24px; padding: 20px 16px; text-align: center; }
+  .card-prox .tit { font-size: 1.05rem; font-weight: 900; color: var(--verde); letter-spacing: 1px; }
+  .card-prox .linha-sel { font-size: 1.05rem; font-weight: 800; margin-top: 2px; }
+  .card-prox .hora { font-size: min(5.2rem, 24vw); font-weight: 900; line-height: 1.05; color: #04230f; margin: 8px 0 6px; }
+  .card-prox .falta { display: inline-block; background: var(--verde); color: #fff; font-size: 1.4rem; font-weight: 900; border-radius: 14px; padding: 8px 18px; }
+  .card-prox .falta.perto { background: var(--vermelho); }
+  .card-prox .sai { margin-top: 16px; font-size: 1.2rem; background: #fff; border-radius: 14px; padding: 10px; border: 2px solid #9fd3b0; }
+  .card-prox .sai span { display: block; font-size: 0.95rem; color: var(--cinza); font-weight: 700; }
+  .card-prox .sai strong { font-weight: 900; font-size: 1.3rem; }
+  .card-prox .dica { margin-top: 12px; font-size: 1.05rem; font-weight: 700; }
+  .card-prox .obs { margin-top: 10px; font-size: 1rem; font-weight: 800; color: #5a3700; background: #fff1c7; border: 2px solid #e5b100; border-radius: 12px; padding: 8px 12px; }
+  .card-prox .depois { margin-top: 14px; padding-top: 12px; border-top: 3px dashed #8cc9a0; font-size: 1.1rem; }
+  .card-prox .depois strong { font-size: 1.5rem; font-weight: 900; }
+  .card-prox.vazio { background: #fff; border-color: var(--borda); }
+  .card-prox.vazio .tit { color: var(--cinza); }
+  .card-prox .msg { font-size: 1.3rem; font-weight: 800; margin-top: 8px; }
+
+  .btn-todos { margin-top: 12px; width: 100%; min-height: 64px; background: #fff; border: 3px solid var(--borda); border-radius: 16px; font-size: 1.15rem; font-weight: 900; }
+
+  .lista { margin-top: 10px; background: #fff; border: 3px solid var(--borda); border-radius: 16px; padding: 14px; }
+  .lista h3 { font-size: 1.05rem; font-weight: 900; color: var(--cinza); margin: 12px 0 8px; }
+  .lista h3:first-of-type { margin-top: 4px; }
+  .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(5.2rem, 1fr)); gap: 8px; }
+  .h { border: 2px solid var(--borda); border-radius: 10px; padding: 8px 4px; text-align: center; font-size: 1.35rem; font-weight: 900; }
+  .h small { display: block; font-size: 0.62rem; font-weight: 800; color: #5a3700; line-height: 1.15; margin-top: 2px; }
+  .h.passou { color: #8a9099; border-color: #dde0e4; background: #f6f6f6; font-weight: 700; text-decoration: line-through; text-decoration-thickness: 2px; }
+  .h.passou small { color: #a6abb2; text-decoration: none; }
+  .h.prox { background: var(--verde); border-color: var(--verde); color: #fff; box-shadow: 0 0 0 3px #9fd3b0; }
+  .h.prox small { color: #e3f6e8; }
+  .legenda { font-size: 0.9rem; color: var(--cinza); margin-bottom: 4px; }
+
+
+  footer { margin-top: 24px; text-align: center; font-size: 1rem; color: var(--cinza); }
+  footer a { color: var(--azul); font-weight: 900; font-size: 1.2rem; text-decoration: none; display: inline-flex; align-items: center; min-height: 56px; margin-top: 6px; padding: 6px 16px; border: 3px solid var(--azul); border-radius: 14px; background: #fff; }
+  footer .fonte { font-size: 0.75rem; margin-top: 14px; }
+
+  /* Tela de escolher linha */
+  .escolha { position: fixed; inset: 0; background: var(--fundo); z-index: 10; overflow-y: auto; display: none; }
+  .escolha.aberta { display: block; }
+  .escolha .cab { position: sticky; top: 0; background: var(--fundo); padding: 14px 16px 10px; max-width: 560px; margin: 0 auto; border-bottom: 2px solid #dde0e4; }
+  .escolha .cab-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+  .escolha h2 { font-size: 1.3rem; font-weight: 900; }
+  .escolha .voltar { background: #fff; border: 3px solid var(--borda); border-radius: 14px; min-height: 56px; padding: 6px 14px; font-weight: 900; font-size: 1rem; }
+  .busca { width: 100%; font-size: 1.25rem; min-height: 60px; padding: 12px 14px; border: 3px solid var(--azul); border-radius: 14px; background: #fff; }
+  .ajuda { font-size: 0.95rem; color: var(--cinza); margin-top: 6px; }
+  .opcoes { max-width: 560px; margin: 0 auto; padding: 10px 16px 30px; display: flex; flex-direction: column; gap: 10px; }
+  .opcoes .sub { font-size: 1rem; font-weight: 900; color: var(--cinza); margin: 8px 0 0 2px; }
+  .opcao { width: 100%; min-height: 64px; text-align: left; background: #fff; border: 3px solid var(--borda); border-radius: 14px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; }
+  .opcao .cod { background: var(--azul-claro); color: var(--azul); font-weight: 900; border-radius: 8px; padding: 4px 8px; flex-shrink: 0; min-width: 3.4rem; text-align: center; }
+  .opcao .nome { font-weight: 800; font-size: 1.05rem; min-width: 0; overflow-wrap: anywhere; }
+  .nada { text-align: center; color: var(--cinza); padding: 20px; font-size: 1.1rem; }
+
+  
+</style>
+</head>
+<body>
+<div class="app">
+  <button class="btn-linha" onclick="abrirEscolha()" aria-label="Trocar de linha">
+    <span class="cod" id="linha-cod">--</span>
+    <span class="nome"><span id="linha-nome">Toque para escolher sua linha</span><span class="trocar">Toque para trocar de linha</span></span>
+  </button>
+
+  <section class="card-prox" id="card-prox" aria-live="polite"></section>
+
+  <button class="btn-todos" id="btn-todos" onclick="alternarTodos()">📋 Ver todos os horários de hoje</button>
+  <div class="lista" id="lista" hidden></div>
+
+
+  <footer>
+    Dúvidas? Ligue para a Floramar:<br>
+    <a href="tel:+553537299000">📞 (35) 3729-9000</a>
+    <p class="fonte">App não oficial. Horários conferidos no site floramar.com.br em 07/10/2026.</p>
+  </footer>
+</div>
+
+<div class="escolha" id="escolha" role="dialog" aria-label="Escolher linha">
+  <div class="cab">
+    <div class="cab-linha">
+      <h2>Qual é a sua linha?</h2>
+      <button class="voltar" onclick="fecharEscolha()">← Voltar</button>
+    </div>
+    <input class="busca" id="busca" type="search" placeholder="Nome do bairro ou número" oninput="montarOpcoes()" autocomplete="off" enterkeyhint="search">
+    <p class="ajuda">Digite só um pedaço, por exemplo: <b>rosalia</b>, <b>kennedy</b> ou <b>225</b>.</p>
+  </div>
+  <div class="opcoes" id="opcoes"></div>
+</div>
+
+<script>
+const LINHAS = [
+      {"id": "N11", "codigo": "N11", "regiao": "NOTURNO", "origem": "Estação Central", "via": "", "destino": "Corujão Cohab", "nomeDisplay": "N11 - Corujão Cohab", "horarios": {"semana": ["02:30"], "sabado": ["02:30"], "domingo": ["02:30"]}},
+      {"id": "N23_PC", "codigo": "N23", "regiao": "NOTURNO", "origem": "Estação Central", "via": "", "destino": "Corujão P. Preta / P. Coberta (sentido P. Coberta)", "nomeDisplay": "N23 - Corujão P. Preta / P. Coberta (sentido P.coberta)", "horarios": {"semana": ["00:50", "01:50", "03:50", "04:50"], "sabado": ["00:50", "01:50", "03:50", "04:50"], "domingo": ["00:50", "01:50", "03:50", "04:50"]}},
+      {"id": "N23_PP", "codigo": "N23", "regiao": "NOTURNO", "origem": "Estação Central", "via": "", "destino": "Corujão P. Preta / P. Coberta (sentido P. Preta)", "nomeDisplay": "N23 - Corujão P. Preta / P. Coberta (sentido P.preta)", "horarios": {"semana": ["01:30", "03:30", "04:30", "05:25"], "sabado": ["01:30", "03:30", "04:30", "05:25"], "domingo": ["01:30", "03:30", "04:30", "05:25"]}},
+      {"id": "P21", "codigo": "P21", "regiao": "CENTRO", "origem": "Estação Vila Nova", "via": "", "destino": "Estação Sul", "nomeDisplay": "P21 - Estação Vila Nova / Estação Sul", "horarios": {"semana": ["07:00", "07:20", "13:00", "13:20", "16:20", "16:45"], "sabado": ["07:20", "13:20", "16:45"], "domingo": ["07:20", "13:20", "16:45"]}, "observacoes": {"semana": {"07:20": "Saindo da Estação Sul", "13:20": "Saindo da Estação Sul", "16:45": "Saindo da Estação Sul", "07:00": "Saindo da Estação Vila Nova", "13:00": "Saindo da Estação Vila Nova", "16:20": "Saindo da Estação Vila Nova"}, "sabado": {"07:20": "Saindo da Estação Sul", "13:20": "Saindo da Estação Sul", "16:45": "Saindo da Estação Sul"}, "domingo": {"07:20": "Saindo da Estação Sul", "13:20": "Saindo da Estação Sul", "16:45": "Saindo da Estação Sul"}}},
+      {"id": "R011", "codigo": "R011", "regiao": "CENTRO", "origem": "Estação Sul", "via": "", "destino": "Circular Sul", "nomeDisplay": "R011 - Circular Sul", "horarios": {"semana": ["06:05", "06:35", "10:30", "11:50", "16:30", "17:40"], "sabado": [], "domingo": []}, "observacoes": {"semana": {"06:05": "Inicio no bairro na rotatória Condomínio Sonho Dourado", "06:35": "Partindo da Estação Sul", "10:30": "Partindo da Estação Sul", "11:50": "Partindo da Estação Sul", "16:30": "Partindo da Estação Sul", "17:40": "Partindo da Estação Sul"}}},
+      {"id": "R101", "codigo": "R101", "regiao": "SUL", "origem": "Estação Central", "via": "", "destino": "Conjunto Habitacional", "nomeDisplay": "R101 - Conjunto Habitacional / Estação Central", "horarios": {"semana": ["00:10", "04:15", "05:30", "05:40", "05:50", "06:00", "06:10", "06:20", "06:30", "06:40", "06:50", "07:00", "07:10", "07:20", "07:30", "07:40", "07:50", "08:00", "08:10", "08:20", "08:30", "08:50", "09:10", "09:30", "09:50", "10:10", "10:30", "10:50", "11:10", "11:30", "11:50", "12:10", "12:30", "12:50", "13:10", "13:30", "13:50", "14:10", "14:30", "14:50", "15:10", "15:30", "15:50", "16:10", "16:20", "16:30", "16:40", "16:50", "17:00", "17:10", "17:30", "17:40", "17:50", "18:00", "18:10", "18:30", "18:50", "19:10", "19:30", "19:45", "20:00", "20:25", "21:10", "21:40", "22:20", "22:55"], "sabado": ["00:10", "04:20", "04:50", "05:22", "05:38", "06:00", "06:24", "06:48", "07:12", "07:36", "08:00", "08:24", "08:48", "09:12", "09:36", "10:00", "10:24", "10:48", "11:12", "11:36", "12:00", "12:24", "12:48", "13:12", "13:36", "14:00", "14:20", "14:48", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:25", "20:35", "21:45", "22:55"], "domingo": ["00:10", "04:20", "05:30", "06:00", "06:35", "07:10", "07:45", "08:20", "08:55", "09:30", "10:05", "10:40", "11:15", "11:50", "12:25", "13:00", "13:35", "14:10", "14:45", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:25", "20:35", "21:45", "22:55"]}, "observacoes": {"semana": {"05:40": "Extra bairro → centro", "06:00": "Extra bairro → centro", "06:20": "Extra bairro → centro", "06:40": "Extra bairro → centro", "07:00": "Extra bairro → centro", "07:20": "Extra bairro → centro", "07:40": "Extra bairro → centro", "08:00": "Extra bairro → centro", "08:20": "Extra bairro → centro", "16:20": "Extra centro → bairro", "16:40": "Extra centro → bairro", "17:00": "Extra centro → bairro", "17:40": "Extra centro → bairro", "18:00": "Extra centro → bairro"}}},
+      {"id": "R102", "codigo": "R102", "regiao": "SUL", "origem": "Estação Central", "via": "", "destino": "Jardim Kennedy", "nomeDisplay": "R102 - Jardim Kennedy / Estação Central", "horarios": {"semana": ["04:20", "05:25", "05:30", "05:50", "06:00", "06:20", "06:45", "06:50", "07:15", "07:40", "08:10", "08:40", "09:00", "09:30", "10:10", "10:50", "11:30", "12:10", "12:50", "13:30", "14:10", "14:50", "15:20", "15:45", "16:10", "16:40", "16:55", "17:05", "17:35", "17:50", "18:00", "18:25", "18:50", "19:25", "20:00", "20:35", "21:45", "23:10"], "sabado": ["04:20", "05:25", "06:00", "06:35", "07:10", "07:45", "08:20", "08:55", "09:30", "10:05", "10:40", "11:15", "11:50", "12:25", "13:00", "13:35", "14:10", "14:45", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "19:25", "20:35", "21:45", "23:10"], "domingo": ["04:20", "05:25", "06:35", "07:45", "08:55", "10:05", "11:15", "12:25", "13:35", "14:45", "15:55", "17:05", "18:15", "19:25", "20:35", "21:45", "23:10"]}, "observacoes": {"semana": {"05:30": "Extra bairro → centro", "06:00": "Extra bairro → centro", "06:50": "Extra bairro → centro", "16:55": "Extra centro → bairro", "17:50": "Extra centro → bairro"}}},
+      {"id": "R103", "codigo": "R103", "regiao": "LESTE", "origem": "Estação Central", "via": "Vila Matilde", "destino": "São Sebastião", "nomeDisplay": "R103 - São Sebastião / Vila Matilde / Estação Central", "horarios": {"semana": ["05:00", "05:40", "06:00", "06:20", "07:00", "07:20", "07:40", "08:20", "09:00", "09:40", "10:20", "11:00", "11:40", "12:20", "13:00", "13:40", "14:20", "15:00", "15:40", "16:20", "17:00", "17:40", "18:20", "19:00", "19:40", "20:40", "21:40", "22:40", "23:40"], "sabado": ["05:00", "05:40", "06:20", "07:00", "07:40", "08:20", "09:00", "09:40", "10:20", "11:00", "11:40", "12:20", "13:00", "13:40", "14:20", "15:40", "17:00", "18:20", "19:40", "20:40", "21:40", "22:40"], "domingo": ["05:40", "06:50", "08:00", "09:10", "10:20", "11:30", "12:40", "13:50", "15:00", "16:10", "17:20", "18:30", "19:40", "20:40", "21:40"]}, "observacoes": {"semana": {"06:00": "Extra bairro → centro", "07:20": "Extra bairro → centro"}}},
+      {"id": "R104", "codigo": "R104", "regiao": "SUL", "origem": "Estação Central", "via": "", "destino": "Jardim Esperança", "nomeDisplay": "R104 - Jardim Esperança / Estação Central", "horarios": {"semana": ["05:00", "05:22", "05:44", "06:06", "06:10", "06:28", "06:50", "07:12", "07:15", "07:34", "07:56", "08:18", "08:40", "09:00", "09:35", "10:10", "10:45", "11:20", "11:55", "12:30", "13:05", "13:40", "14:15", "14:50", "15:25", "16:00", "16:24", "16:48", "17:12", "17:36", "18:00", "18:24", "18:48", "19:10", "19:30", "20:00", "21:00", "22:00", "23:00"], "sabado": ["05:00", "05:35", "06:10", "06:45", "07:20", "07:55", "08:30", "09:05", "09:40", "10:15", "10:50", "11:25", "12:00", "12:35", "13:10", "13:45", "14:20", "14:55", "15:30", "16:40", "17:50", "19:00", "20:00", "21:00"], "domingo": ["05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"]}, "observacoes": {"semana": {"06:10": "Extra bairro → centro", "06:50": "Neste horário também sai um extra do bairro", "07:15": "Extra bairro → centro"}}},
+      {"id": "R105", "codigo": "R105", "regiao": "LESTE", "origem": "Estação Central", "via": "", "destino": "Jardim Quisisana", "nomeDisplay": "R105 - Jardim Quisisana / Estação Central", "horarios": {"semana": ["05:35", "06:35", "07:45", "08:55", "10:05", "11:15", "12:25", "13:35", "14:45", "15:55", "17:05", "18:15", "19:25", "20:35", "21:35", "22:35"], "sabado": ["05:35", "06:35", "07:45", "08:55", "10:05", "11:15", "12:25", "13:35", "14:45", "15:55", "17:05", "18:15", "19:25", "20:35", "21:35", "22:35"], "domingo": []}},
+      {"id": "R106", "codigo": "R106", "regiao": "SUL", "origem": "Estação Central", "via": "", "destino": "São José", "nomeDisplay": "R106 - São José", "horarios": {"semana": ["05:40", "05:45", "06:10", "06:35", "07:00", "07:25", "07:50", "08:15", "08:40", "09:05", "09:30", "09:55", "10:20", "10:45", "11:10", "11:35", "12:00", "12:25", "12:50", "13:15", "13:40", "14:05", "14:30", "14:55", "15:20", "15:45", "16:10", "16:35", "17:00", "17:25", "17:50", "18:15", "18:40", "19:00", "19:45", "20:35", "21:25", "22:20", "23:10"], "sabado": ["05:35", "06:25", "07:15", "08:05", "08:55", "09:45", "10:35", "11:25", "11:50", "12:15", "12:40", "13:05", "13:30", "13:55", "14:20", "14:45", "15:30", "16:20", "17:10", "18:00", "18:50", "19:45", "20:35", "21:25", "22:20"], "domingo": ["05:35", "06:25", "07:15", "08:05", "08:55", "09:45", "10:35", "11:25", "12:15", "13:55", "14:45", "15:35", "16:25", "17:15", "18:05", "18:55", "19:45", "20:35", "21:25", "22:20"]}, "observacoes": {"semana": {"05:40": "Começa no bairro"}}},
+      {"id": "R115", "codigo": "R115", "regiao": "LESTE", "origem": "Estação Central", "via": "Sta. Tereza", "destino": "São Bento", "nomeDisplay": "R115 - São Bento / Sta. Tereza / Est. Central", "horarios": {"semana": ["05:10", "05:30", "05:50", "06:10", "06:30", "06:50", "07:10", "07:20", "07:30", "07:50", "08:10", "08:37", "09:04", "09:31", "09:58", "10:25", "10:52", "11:19", "11:46", "12:13", "12:40", "13:07", "13:34", "14:01", "14:28", "14:57", "15:24", "15:51", "16:10", "16:30", "16:50", "17:10", "17:30", "17:50", "18:10", "18:13", "18:30", "18:50", "19:10", "19:45", "20:20", "20:55", "21:30", "22:05", "22:40", "23:40"], "sabado": ["05:10", "05:50", "06:30", "07:10", "07:50", "08:30", "09:10", "09:50", "10:30", "11:10", "11:50", "12:30", "13:10", "13:50", "14:30", "15:10", "15:50", "16:30", "17:10", "17:50", "18:30", "19:10", "20:20", "21:30", "22:40", "23:40"], "domingo": ["05:10", "06:20", "07:30", "08:40", "09:50", "11:00", "12:10", "13:20", "14:30", "15:40", "16:50", "18:00", "19:10", "20:20", "21:30", "22:40", "23:40"]}, "observacoes": {"semana": {"05:10": "Neste horário também sai um extra do bairro", "06:10": "Neste horário também sai um extra do bairro", "07:20": "Extra bairro → centro", "18:13": "Extra centro → bairro"}}},
+      {"id": "R201", "codigo": "R201", "regiao": "OESTE", "origem": "Estação Central", "via": "Caio Junqueira", "destino": "Jardim Del Rey", "nomeDisplay": "R201 - Jardim Delrey / Caio Junqueira / Est. Central", "horarios": {"semana": ["05:35", "06:25", "07:15", "08:05", "08:55", "09:45", "10:35", "11:25", "12:15", "13:05", "13:55", "14:45", "15:35", "16:25", "17:15", "18:05", "18:55", "19:45", "20:35", "21:25", "22:15"], "sabado": ["06:25", "07:15", "08:05", "08:55", "09:45", "10:35", "11:25", "12:15", "13:05", "13:55", "14:45", "15:35", "16:25", "17:15", "18:05", "18:55", "19:45"], "domingo": ["05:35", "06:25", "07:15", "11:25", "12:15", "17:15", "18:05"]}},
+      {"id": "R202", "codigo": "R202", "regiao": "OESTE", "origem": "Estação Central", "via": "Jd. São Paulo", "destino": "Monjolinho", "nomeDisplay": "R202 - Monjolinho / Jd. São Paulo / Estação Central", "horarios": {"semana": ["05:40", "06:20", "07:00", "07:40", "08:20", "09:00", "09:50", "10:40", "11:30", "12:20", "13:10", "14:00", "14:50", "15:40", "16:30", "17:20", "18:10", "19:00", "19:40", "20:20", "21:00", "21:40", "22:20", "23:00"], "sabado": ["05:40", "06:20", "07:00", "07:40", "08:20", "09:00", "09:50", "10:40", "11:30", "12:20", "13:10", "14:00", "14:50", "15:40", "16:30", "17:20", "18:10", "19:00", "19:40", "20:20", "21:00", "21:40"], "domingo": ["06:20", "07:00", "07:40", "08:20", "09:00", "09:40", "10:20", "11:00", "11:40", "12:20", "13:00", "13:40", "14:20", "15:00", "15:40", "16:20", "17:00", "17:40", "18:20", "19:00", "19:40", "20:20", "21:00", "21:40"]}},
+      {"id": "R203", "codigo": "R203", "regiao": "OESTE", "origem": "Estação Central", "via": "Jd. São Paulo", "destino": "Santa Emília", "nomeDisplay": "R203 - Sta Emília / Jd. São Paulo / Estação Central", "horarios": {"semana": ["10:15", "11:05", "11:55", "12:45", "13:35", "14:25", "15:15", "16:05", "16:55", "17:45"], "sabado": [], "domingo": []}},
+      {"id": "R204", "codigo": "R204", "regiao": "OESTE", "origem": "Estação Central", "via": "", "destino": "Jardim Azaléias", "nomeDisplay": "R204 - Jardim Azaléias / Estação Central", "horarios": {"semana": ["06:00", "06:50", "07:40", "08:30", "09:20", "10:10", "11:00", "11:50", "12:40", "13:30", "14:20", "15:20", "16:20", "17:20", "18:20", "19:20", "20:20"], "sabado": ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"], "domingo": []}},
+      {"id": "R205", "codigo": "R205", "regiao": "OESTE", "origem": "Estação Central", "via": "Dom Bosco", "destino": "Nova Aurora", "nomeDisplay": "R205 - Nova Aurora / Dom Bosco / Estação Central", "horarios": {"semana": ["06:05", "07:05", "11:05", "12:05", "15:05", "16:05", "17:05", "18:05", "19:05"], "sabado": [], "domingo": []}},
+      {"id": "R206", "codigo": "R206", "regiao": "LESTE", "origem": "Estação Central", "via": "", "destino": "Jardim São Paulo", "nomeDisplay": "R206 - Jardim São Paulo / Estação Central", "horarios": {"semana": ["05:00", "05:50", "06:15", "06:40", "07:05", "07:30", "07:55", "08:20", "08:45", "09:10", "10:00", "10:50", "11:15", "11:40", "12:05", "12:30", "13:20", "14:20", "14:50", "15:20", "15:50", "16:20", "16:50", "17:20", "17:50", "18:20", "19:10", "20:00", "20:50", "21:35", "22:20", "23:00"], "sabado": ["05:00", "05:50", "06:40", "07:30", "08:20", "09:10", "10:00", "10:50", "11:40", "12:30", "13:20", "14:10", "15:00", "15:50", "16:40", "17:30", "18:20", "19:10", "20:00", "23:00"], "domingo": ["05:00", "05:50", "06:40", "07:30", "08:20", "09:10", "10:00", "10:50", "11:40", "12:30", "13:20", "14:10", "15:00", "15:50", "16:40", "17:30", "18:20", "19:10", "20:00", "23:00"]}},
+      {"id": "R209", "codigo": "R209", "regiao": "OESTE", "origem": "Estação Central", "via": "Jd. Itamaraty", "destino": "Parque Pinheiros", "nomeDisplay": "R209 - Parque Pinheiros / Jd. Itamaraty", "horarios": {"semana": ["00:10", "04:15", "05:25", "05:40", "05:50", "06:00", "06:10", "06:20", "06:30", "06:40", "06:50", "07:00", "07:10", "07:20", "07:30", "07:40", "07:50", "08:00", "08:10", "08:20", "08:40", "09:00", "09:20", "09:40", "10:00", "10:20", "10:40", "11:00", "11:20", "11:40", "12:00", "12:20", "12:40", "13:00", "13:20", "13:40", "14:00", "14:20", "14:40", "15:00", "15:20", "15:40", "16:00", "16:20", "16:30", "16:40", "16:50", "17:00", "17:10", "17:20", "17:30", "17:50", "18:00", "18:10", "18:20", "18:30", "18:40", "19:00", "19:20", "19:40", "20:10", "20:35", "21:45", "22:55"], "sabado": ["00:10", "04:15", "05:18", "05:38", "05:50", "06:00", "06:24", "06:48", "07:00", "07:12", "07:36", "08:00", "08:24", "08:48", "09:12", "09:36", "10:00", "10:24", "10:48", "11:12", "11:36", "12:00", "12:24", "12:48", "13:12", "13:36", "14:00", "14:20", "14:48", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:25", "20:35", "21:45", "22:55"], "domingo": ["00:10", "04:15", "05:25", "06:00", "06:35", "07:10", "07:45", "08:20", "08:55", "09:30", "10:05", "10:40", "11:15", "11:50", "12:25", "13:00", "13:35", "14:10", "14:45", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:25", "20:35", "21:45", "22:55"]}, "observacoes": {"semana": {"05:50": "Extra bairro → centro", "06:10": "Extra bairro → centro", "06:30": "Extra bairro → centro", "06:50": "Extra bairro → centro", "07:10": "Extra bairro → centro", "07:30": "Extra bairro → centro", "07:50": "Extra bairro → centro", "08:10": "Extra bairro → centro", "16:30": "Extra centro → bairro", "16:50": "Extra centro → bairro", "17:10": "Extra centro → bairro", "17:30": "Extra centro → bairro", "17:50": "Extra centro → bairro", "18:10": "Extra centro → bairro", "18:30": "Extra centro → bairro"}, "sabado": {"05:50": "Extra bairro → centro", "07:00": "Extra bairro → centro"}}},
+      {"id": "R220", "codigo": "R220", "regiao": "LESTE", "origem": "Estação Central", "via": "", "destino": "Ponte Coberta", "nomeDisplay": "R220 - Ponte Coberta / Estação Central", "horarios": {"semana": ["00:05", "04:45", "05:15", "05:45", "06:15", "06:45", "07:15", "07:45", "08:15", "08:45", "09:15", "09:45", "10:15", "10:45", "11:15", "11:45", "12:15", "12:45", "13:15", "13:45", "14:15", "14:45", "15:15", "15:45", "16:15", "16:45", "17:15", "17:45", "18:15", "18:45", "19:15", "19:45", "20:15", "21:15", "22:15", "23:15"], "sabado": ["04:45", "05:15", "05:45", "06:15", "06:45", "07:15", "07:45", "08:15", "08:45", "09:15", "09:45", "10:15", "10:45", "11:15", "11:45", "12:15", "12:45", "13:15", "13:45", "14:15", "15:15", "16:15", "17:15", "18:15", "19:15", "20:15", "21:15", "22:15"], "domingo": ["05:00", "06:00", "06:50", "07:40", "08:30", "09:20", "10:10", "11:00", "11:50", "12:40", "13:30", "14:20", "15:10", "16:00", "16:50", "17:40", "18:30", "19:20", "20:10", "21:00", "21:50"]}},
+      {"id": "R221", "codigo": "R221", "regiao": "OESTE", "origem": "Estação Central", "via": "Monte Verde", "destino": "Jardim Regina", "nomeDisplay": "R221 - Jardim Regina / Monte Verde / Estação Central", "horarios": {"semana": ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"], "sabado": ["06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"], "domingo": []}},
+      {"id": "R223", "codigo": "R223", "regiao": "LESTE", "origem": "Estação Central", "via": "", "destino": "Santa Clara - Campos Elíseos", "nomeDisplay": "R223 - Sta. Clara - Campos Elíseos / Estação Central", "horarios": {"semana": ["05:30", "05:50", "06:00", "06:35", "07:10", "07:45", "08:20", "08:55", "09:30", "10:05", "10:40", "11:15", "11:50", "12:25", "13:00", "13:35", "14:10", "14:45", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:15", "20:15", "21:15", "22:15"], "sabado": ["06:00", "07:10", "08:20", "09:30", "10:40", "11:50", "13:00", "14:10", "15:20", "16:30", "17:40", "18:50", "20:00", "21:00", "22:00"], "domingo": ["06:00", "07:00", "11:00", "12:00", "17:00", "18:00", "19:00"]}, "observacoes": {"semana": {"05:50": "Extra bairro → centro · Via Jd. Primavera"}}},
+      {"id": "R224", "codigo": "R224", "regiao": "LESTE", "origem": "Estação Central", "via": "", "destino": "Dom Bosco", "nomeDisplay": "R224 - Dom Bosco / Estação Central", "horarios": {"semana": ["05:30", "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00", "20:50", "21:45", "22:45", "23:45"], "sabado": ["05:30", "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:50", "16:45", "17:45", "18:45", "19:45", "20:45", "21:45"], "domingo": ["05:35", "06:25", "07:15", "08:05", "08:55", "09:45", "10:35", "11:25", "12:15", "13:55", "14:45", "15:35", "16:25", "17:15", "18:05", "18:55", "19:45", "20:35", "21:25"]}},
+      {"id": "R225", "codigo": "R225", "regiao": "LESTE", "origem": "Estação Central", "via": "Pq. Primavera", "destino": "Sta. Rosália", "nomeDisplay": "R225 - Sta. Rosália / Pq. Primavera / Estação Central", "horarios": {"semana": ["06:05", "06:55", "07:45", "08:35", "09:25", "10:15", "11:05", "11:55", "12:45", "13:35", "14:25", "15:15", "16:05", "16:55", "17:45", "18:35", "19:25", "20:10", "20:50", "21:30", "22:10"], "sabado": ["06:05", "06:55", "07:45", "08:35", "09:25", "10:15", "11:05", "11:55", "12:45", "13:35", "14:25", "15:15", "16:05", "16:55", "17:45", "18:35", "19:25", "20:15"], "domingo": ["06:10", "06:50", "11:30", "12:10", "17:30", "18:10"]}},
+      {"id": "R226", "codigo": "R226", "regiao": "OESTE", "origem": "Estação Central", "via": "", "destino": "Estância São José", "nomeDisplay": "R226 - Estância São José / Estação Central", "horarios": {"semana": ["05:00", "05:35", "06:10", "06:45", "07:20", "07:55", "08:30", "09:05", "09:40", "10:15", "10:50", "11:25", "12:00", "12:35", "13:10", "13:45", "14:20", "14:55", "15:30", "16:05", "16:40", "17:15", "17:50", "18:25", "19:00", "20:10", "21:20", "22:30"], "sabado": ["05:35", "06:10", "06:45", "07:20", "07:55", "08:30", "09:05", "09:40", "10:15", "10:50", "11:25", "12:00", "12:35", "13:10", "13:45", "14:20", "15:30", "16:40", "17:50", "19:00", "20:10", "21:20"], "domingo": ["05:25", "06:25", "07:25", "11:25", "12:25", "13:25", "17:25", "18:25", "19:25"]}},
+      {"id": "R228", "codigo": "R228", "regiao": "LESTE", "origem": "Estação Central", "via": "M. dos Pássaros", "destino": "Chacara Poços de Caldas", "nomeDisplay": "R228 - Chac.p.caldas / M. dos Pássaros / Est Central", "horarios": {"semana": ["05:40", "07:10", "08:40", "11:40", "16:10", "17:40", "19:10", "21:20"], "sabado": ["05:40", "07:10", "11:40", "16:10", "17:40", "19:10", "21:20"], "domingo": ["05:40", "07:10", "11:40", "17:40", "19:10"]}},
+      {"id": "R301", "codigo": "R301", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Santa Augusta", "nomeDisplay": "R301 - Santa Augusta / Estação Central", "horarios": {"semana": ["05:45", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "20:00", "20:50", "21:40", "22:30", "23:10"], "sabado": ["05:45", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"], "domingo": ["07:00", "07:50", "12:00", "12:50", "17:00"]}, "observacoes": {"semana": {"05:45": "Começa no bairro", "15:30": "Neste horário também sai um via Jd. Planalto", "16:30": "Neste horário também sai um via Jd. Planalto", "17:30": "Neste horário também sai um via Jd. Planalto", "18:30": "Neste horário também sai um via Jd. Planalto"}, "sabado": {"05:45": "Começa no bairro"}}},
+      {"id": "R304", "codigo": "R304", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Expressinho Santa Ângela", "nomeDisplay": "R304 - Expressinho Santa Ângela / Est. Central", "horarios": {"semana": ["06:35", "07:25", "08:15", "11:35", "12:25", "16:20", "17:10", "18:05"], "sabado": [], "domingo": []}},
+      {"id": "R305", "codigo": "R305", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Expressinho Champagnat", "nomeDisplay": "R305 - Expressinho Champagnat / Est. Central", "horarios": {"semana": ["05:35", "06:00", "06:15", "06:30", "06:45", "07:00", "07:15", "07:30", "07:45", "08:00", "08:15", "08:30", "08:45", "09:00", "09:15", "09:30", "09:45", "10:00", "10:15", "10:30", "10:45", "11:00", "11:15", "11:30", "11:45", "12:00", "12:15", "12:30", "12:45", "13:00", "13:15", "13:30", "13:45", "14:00", "14:15", "14:30", "14:45", "15:00", "15:15", "15:30", "15:45", "16:00", "16:20", "16:40", "17:00", "17:20", "17:40", "18:00", "18:20", "18:40", "19:00", "19:20", "19:40", "20:00", "20:20", "20:40", "21:00", "21:20", "21:40", "22:00", "22:40", "23:00", "23:20", "23:40"], "sabado": ["05:40", "06:00", "06:20", "06:40", "07:00", "07:20", "07:40", "08:00", "08:20", "08:40", "09:00", "09:20", "09:40", "10:00", "10:20", "10:40", "11:00", "11:20", "11:40", "12:00", "12:20", "12:40", "13:00", "13:20", "13:40", "14:00", "14:20", "14:40", "15:00", "15:20", "15:40", "16:00", "16:20", "16:40", "17:00", "17:20", "17:40", "18:00", "18:20", "18:40", "19:00", "19:20", "19:40", "20:00", "20:20", "20:40", "21:00", "21:20", "21:40", "22:00", "22:40", "23:00", "23:20", "23:40"], "domingo": ["05:40", "06:00", "06:20", "06:40", "07:00", "07:20", "07:40", "08:00", "08:20", "08:40", "09:00", "09:20", "09:40", "10:00", "10:20", "10:40", "11:00", "11:20", "11:40", "12:00", "12:20", "12:40", "13:00", "13:20", "13:40", "14:00", "14:20", "14:40", "15:00", "15:20", "15:40", "16:00", "16:20", "16:40", "17:00", "17:20", "17:40", "18:00", "18:20", "18:40", "19:00", "19:20", "19:40", "20:00", "20:20", "20:40", "21:00", "21:20", "21:40", "22:00", "22:40", "23:00", "23:20", "23:40"]}},
+      {"id": "R331", "codigo": "R331", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Vila Togni", "nomeDisplay": "R331 - Vila Togni / Estação Central", "horarios": {"semana": ["05:35", "06:00", "06:50", "07:40", "08:30", "09:20", "10:10", "11:00", "11:50", "12:40", "13:30", "14:20", "15:10", "16:00", "16:50", "17:40", "18:30", "19:20", "20:00", "20:40", "21:20", "22:00", "22:40"], "sabado": ["05:35", "06:00", "06:50", "07:40", "08:30", "09:20", "10:10", "11:00", "11:50", "12:40", "13:30", "14:20", "15:10", "16:00", "16:50", "17:40", "18:30"], "domingo": []}, "observacoes": {"semana": {"05:35": "Começa no bairro"}, "sabado": {"05:35": "Começa no bairro"}}},
+      {"id": "R332", "codigo": "R332", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Jardim Country Club", "nomeDisplay": "R332 - Jd. Country Club / Estação Central", "horarios": {"semana": ["05:30", "06:00", "06:30", "07:00", "07:30", "08:00", "08:30", "09:00", "09:30", "10:00", "10:30", "11:00", "11:30", "12:00", "12:30", "13:00", "13:35", "14:10", "14:45", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:30", "20:00", "21:00", "22:00"], "sabado": ["05:30", "06:00", "07:00", "07:30", "08:00", "08:30", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:05", "20:00"], "domingo": ["05:30", "06:00", "07:00", "11:00", "12:00", "16:00", "17:00", "18:00"]}, "observacoes": {"semana": {"05:30": "Começa no bairro", "06:00": "Neste horário também sai um do bairro"}, "sabado": {"05:30": "Começa no bairro"}, "domingo": {"05:30": "Começa no bairro"}}},
+      {"id": "R333", "codigo": "R333", "regiao": "CENTRO", "origem": "Véu das Noivas", "via": "", "destino": "Vale das Antas", "nomeDisplay": "R333 - Vale das Antas / Véu das Noivas", "horarios": {"semana": ["06:20", "07:20", "08:20", "10:40", "12:40", "14:40", "17:20", "18:20"], "sabado": ["06:20", "07:20", "08:20", "10:20", "12:20", "14:20", "17:20", "18:20"], "domingo": []}},
+      {"id": "R334", "codigo": "R334", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Vila Rica", "nomeDisplay": "R334 - Vila Rica / Estação Central", "horarios": {"semana": ["06:10", "07:00", "07:50", "08:40", "09:30", "10:20", "11:10", "12:00", "12:50", "13:40", "14:30", "15:20", "16:10", "17:00", "17:50", "18:40", "19:30", "20:20", "21:00", "21:50", "23:00"], "sabado": ["06:10", "07:00", "07:50", "08:40", "09:30", "10:20", "11:10", "12:00", "12:50", "13:40", "14:30", "15:20", "16:10", "17:00", "17:50", "18:40"], "domingo": ["07:20", "08:20", "11:20", "12:20", "16:20", "17:20"]}},
+      {"id": "R335", "codigo": "R335", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Represa Bortolan", "nomeDisplay": "R335 - Represa Bortolan / Estação Central", "horarios": {"semana": ["05:30", "06:30", "08:00", "11:30", "15:20", "16:50", "18:20"], "sabado": ["05:30", "06:30", "07:50", "11:30", "15:20", "16:50", "18:20"], "domingo": []}},
+      {"id": "R336", "codigo": "R336", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Marco Divisório", "nomeDisplay": "R336 - Marco Divisório / Estação Central", "horarios": {"semana": ["05:20", "06:00", "06:45", "07:30", "08:15", "09:00", "10:30", "11:15", "12:00", "12:45", "13:30", "14:15", "15:00", "15:45", "16:30", "17:15", "18:00", "18:45", "19:30", "20:15", "21:00", "22:50"], "sabado": ["05:20", "06:00", "06:45", "07:30", "08:15", "09:00", "10:30", "11:15", "12:00", "12:45", "13:30", "14:15", "15:00", "16:30", "18:00", "19:30", "21:00", "22:20"], "domingo": ["05:20", "06:00", "07:30", "10:30", "15:00", "18:00", "19:30", "21:00"]}},
+      {"id": "R337", "codigo": "R337", "regiao": "CENTRO", "origem": "Estação Central", "via": "", "destino": "Maria Imaculada", "nomeDisplay": "R337 - Maria Imaculada / Estação Central", "horarios": {"semana": ["05:40", "06:00", "06:35", "07:10", "07:45", "08:20", "08:55", "09:30", "10:05", "10:40", "11:15", "11:50", "12:25", "13:00", "13:35", "14:10", "14:45", "15:20", "15:55", "16:30", "17:05", "17:40", "18:15", "18:50", "19:25", "20:05", "21:05", "22:05", "23:05"], "sabado": ["06:05", "07:05", "08:05", "09:05", "10:05", "11:05", "12:05", "13:05", "14:05", "15:05", "16:05", "17:05", "18:05", "19:05", "20:05", "21:05", "22:05"], "domingo": ["06:05", "07:05", "08:05", "11:05", "18:05", "19:05"]}},
+      {"id": "R338", "codigo": "R338", "regiao": "CENTRO", "origem": "Estação Central", "via": "Jd. Europa", "destino": "São Geraldo", "nomeDisplay": "R338 - São Geraldo / Jd. Europa / Estação Central", "horarios": {"semana": ["06:35", "07:50", "11:40", "15:35", "16:35", "17:50", "18:50"], "sabado": ["11:20", "13:20"], "domingo": []}},
+      {"id": "R401", "codigo": "R401", "regiao": "CENTRO", "origem": "Estação Central", "via": "Jd. Estados", "destino": "Santana", "nomeDisplay": "R401 - Santana / Jd. Estados / Estação Central", "horarios": {"semana": ["06:00", "06:40", "07:20", "08:00", "08:40", "09:20", "10:00", "10:40", "11:20", "12:00", "12:40", "13:20", "14:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20", "22:00"], "sabado": ["08:00", "08:40", "09:20", "11:20", "12:00", "12:40", "13:20", "14:00", "14:40", "15:20", "16:00", "16:40", "17:20", "18:00", "18:40", "19:20", "20:00", "20:40", "21:20", "22:00"], "domingo": []}},
+      {"id": "R339", "codigo": "R339", "regiao": "CENTRO", "origem": "Dr. Ottoni", "via": "", "destino": "Residencial Veredas", "nomeDisplay": "R339 - Residencial Veredas / Dr. Ottoni", "horarios": {"semana": ["06:15", "07:15", "08:15", "11:15", "12:15", "16:15", "17:15", "18:15"], "sabado": [], "domingo": []}},
+      {"id": "R330", "codigo": "R330", "regiao": "CENTRO", "origem": "Casa Carneiro", "via": "Av. Pe. Cletus", "destino": "PUC", "nomeDisplay": "R330 - Exp. Av. Pe. Cletus", "horarios": {"semana": ["06:30", "07:30", "07:35", "08:05", "08:30", "12:20", "12:21", "12:50", "16:40", "17:10", "17:30", "18:30"], "sabado": [], "domingo": []}, "observacoes": {"semana": {"06:30": "Saída Casa Carneiro", "07:30": "Saída Casa Carneiro", "07:35": "Saída Casa Carneiro", "08:05": "Saída Casa Carneiro", "08:30": "Saída Casa Carneiro", "12:50": "Saída Casa Carneiro", "16:40": "Saída Casa Carneiro", "17:30": "Saída Casa Carneiro", "18:30": "Saída Casa Carneiro", "12:20": "Saída PUC", "12:21": "Saída PUC", "17:10": "Saída PUC"}}}
+    ];
+
+const NOME_DIA = { semana: 'dia de semana', sabado: 'sábado', domingo: 'domingo ou feriado' };
+const SEMANA = ['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+let linhaId = null;
+let diaManual = null;
+let todosAberto = false;
+
+function guardar(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function ler(k, padrao) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : padrao; } catch (e) { return padrao; } }
+
+function tipoDia(data) { const d = data.getDay(); return d === 0 ? 'domingo' : d === 6 ? 'sabado' : 'semana'; }
+function hojeStr(data) { return data.getFullYear() + '-' + (data.getMonth() + 1) + '-' + data.getDate(); }
+function diaHoje(agora) { return diaManual || tipoDia(agora); }
+function minutos(h) { const [a, b] = h.split(':').map(Number); return a * 60 + b; }
+function hhmm(min) { min = (min + 1440) % 1440; return String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0'); }
+function semAcento(s) { return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  .replace(/\bsanta\b/g, 'sta').replace(/\bjardim\b/g, 'jd').replace(/\bparque\b/g, 'pq').replace(/[^a-z0-9 ]/g, ' '); }
+function linhaAtual() { return LINHAS.find(l => l.id === linhaId); }
+function obs(l, dia, h) { return (l.observacoes && l.observacoes[dia] && l.observacoes[dia][h]) || ''; }
+function nomeCurto(l) { return l.nomeDisplay.replace(/^\S+ - /, '').replace(/\s*\/\s*Est(ação|\.)?\s*Central$/i, ''); }
+
+function textoFalta(min) {
+  if (min <= 0) return 'Saindo agora!';
+  if (min < 60) return `Faltam ${min} minuto${min === 1 ? '' : 's'}`;
+  const h = Math.floor(min / 60), m = min % 60;
+  return `Faltam ${h} hora${h > 1 ? 's' : ''}` + (m ? ` e ${m} min` : '');
+}
+
+function proximos(l, agora) {
+  const dia = diaHoje(agora);
+  const agoraMin = agora.getHours() * 60 + agora.getMinutes();
+  const hoje = (l.horarios[dia] || []).filter(h => minutos(h) >= agoraMin);
+  if (hoje.length) return { lista: hoje, dia, quando: null };
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(agora); d.setDate(d.getDate() + i);
+    const td = tipoDia(d);
+    if ((l.horarios[td] || []).length) return { lista: l.horarios[td], dia: td, quando: i === 1 ? 'amanhã' : SEMANA[d.getDay()] };
+  }
+  return { lista: [], dia, quando: null };
+}
+
+// De onde sai aquele horário (algumas viagens saem do bairro ou de outro ponto)
+function saida(l, dia, h) {
+  const o = obs(l, dia, h);
+  const m = o.match(/(?:Saindo da|Saindo do|Saída|Partindo da|Partindo do)\s+([^+·]+)/i);
+  if (m && !/centro/i.test(m[1])) return { local: m[1].trim(), resto: '' };
+  if (/bairro → centro|Começa no bairro|Inicio no bairro|Início no bairro/i.test(o)) return { local: l.destino + ' (bairro)', resto: o.replace(/Começa no bairro/i, '').replace(/^\s*[·+]\s*/, '').trim() };
+  return { local: l.origem, resto: o };
+}
+
+function calcular(l, agora) {
+  const p = proximos(l, agora);
+  if (!p.lista.length) return null;
+  const doPonto = p.lista.filter(x => saida(l, p.dia, x).local === l.origem);
+  const principal = doPonto.length ? doPonto : p.lista;
+  const h = principal[0];
+  const agoraMin = agora.getHours() * 60 + agora.getMinutes();
+  const sd = saida(l, p.dia, h);
+  return {
+    p, h, sd,
+    falta: p.quando ? null : minutos(h) - agoraMin,
+    depois: principal.slice(1).filter(x => saida(l, p.dia, x).local === sd.local).slice(0, 2),
+    outra: p.lista.find(x => minutos(x) < minutos(h) && saida(l, p.dia, x).local !== sd.local)
+  };
+}
+
+function render() {
+  const agora = new Date();
+  const dia = diaHoje(agora);
+
+  const l = linhaAtual();
+  const card = document.getElementById('card-prox');
+  document.getElementById('btn-todos').hidden = !l;
+  document.getElementById('linha-cod').textContent = l ? l.codigo : '--';
+  document.getElementById('linha-nome').textContent = l ? nomeCurto(l) : 'Toque para escolher sua linha';
+  if (!l) {
+    card.className = 'card-prox vazio';
+    card.innerHTML = '<p class="tit">PRÓXIMO ÔNIBUS</p><p class="msg">Toque acima para escolher sua linha 👆</p>';
+    document.getElementById('lista').hidden = true;
+    return;
+  }
+
+  const c = calcular(l, agora);
+  if (!c) {
+    card.className = 'card-prox vazio';
+    card.innerHTML = '<p class="tit">PRÓXIMO ÔNIBUS</p><p class="msg">Esta linha não tem horários cadastrados.</p>';
+  } else {
+    const semHoje = !(l.horarios[dia] || []).length;
+    const titulo = c.p.quando
+      ? (semHoje ? 'ESTA LINHA NÃO RODA HOJE' : 'NÃO TEM MAIS ÔNIBUS HOJE') + `<br>PRÓXIMO: ${c.p.quando.toUpperCase()}`
+      : 'PRÓXIMO ÔNIBUS';
+    const chegar = c.falta !== null && c.falta > 5 ? `🚶 Esteja no ponto até as <strong class="num">${hhmm(minutos(c.h) - 5)}</strong>` : '';
+    card.className = 'card-prox';
+    card.innerHTML =
+      `<p class="tit">${titulo}</p>
+       <p class="hora num">${c.h}</p>
+       ${c.falta !== null ? `<span class="falta${c.falta <= 10 ? ' perto' : ''}">${textoFalta(c.falta)}</span>` : ''}
+       ${chegar ? `<p class="dica">${chegar}</p>` : ''}
+       <p class="sai"><span>O ônibus sai de:</span><strong>${c.sd.local}</strong></p>
+       ${c.sd.resto ? `<p class="obs">⚠️ ${c.sd.resto}</p>` : ''}
+       ${c.outra ? `<p class="obs">ℹ️ Antes, às <strong class="num">${c.outra}</strong>, sai um de ${saida(l, c.p.dia, c.outra).local}</p>` : ''}
+       ${c.depois.length ? `<p class="depois">Os próximos depois deste:<br><strong class="num">${c.depois.join(' &nbsp;e&nbsp; ')}</strong></p>` : ''}`;
+
+  }
+
+  if (todosAberto) montarLista(l, agora);
+}
+
+function montarLista(l, agora) {
+  const dia = diaHoje(agora);
+  const agoraMin = agora.getHours() * 60 + agora.getMinutes();
+  const hs = l.horarios[dia] || [];
+  const el = document.getElementById('lista');
+  if (!hs.length) { el.innerHTML = `<p class="legenda">Esta linha não roda hoje (${NOME_DIA[dia]}).</p>`; return; }
+  const prox = hs.find(h => minutos(h) >= agoraMin);
+  const blocos = [['🌙 Madrugada', 0, 5], ['🌅 Manhã', 5, 12], ['☀️ Tarde', 12, 18], ['🌆 Noite', 18, 24]];
+  el.innerHTML = `<p class="legenda">Saindo de <strong>${l.origem}</strong> · ${NOME_DIA[dia]}.<br>Riscados já passaram. Em verde, o próximo.</p>` +
+    blocos.map(([nome, a, b]) => {
+      const lista = hs.filter(h => { const x = parseInt(h, 10); return x >= a && x < b; });
+      if (!lista.length) return '';
+      return `<h3>${nome}</h3><div class="grade">` + lista.map(h => {
+        const cl = h === prox ? 'h prox' : (minutos(h) < agoraMin ? 'h passou' : 'h');
+        const o = obs(l, dia, h);
+        return `<div class="${cl} num">${h}${o ? `<small>${o}</small>` : ''}</div>`;
+      }).join('') + '</div>';
+    }).join('');
+}
+
+function alternarTodos() {
+  todosAberto = !todosAberto;
+  document.getElementById('lista').hidden = !todosAberto;
+  document.getElementById('btn-todos').textContent = todosAberto ? '✕ Esconder a lista' : '📋 Ver todos os horários de hoje';
+  render();
+}
+
+
+function abrirEscolha() {
+  document.getElementById('busca').value = '';
+  montarOpcoes();
+  document.getElementById('escolha').classList.add('aberta');
+  document.getElementById('escolha').scrollTop = 0;
+}
+function fecharEscolha() { document.getElementById('escolha').classList.remove('aberta'); }
+
+function opcaoHTML(l) {
+  return `<button class="opcao" onclick="selecionar('${l.id}')"><span class="cod">${l.codigo}</span><span class="nome">${nomeCurto(l)}</span></button>`;
+}
+function montarOpcoes() {
+  const termo = semAcento(document.getElementById('busca').value).trim();
+  const el = document.getElementById('opcoes');
+  if (!termo) {
+    const rec = ler('recentes', []).map(id => LINHAS.find(l => l.id === id)).filter(Boolean);
+    el.innerHTML = (rec.length ? '<p class="sub">Usadas por último</p>' + rec.map(opcaoHTML).join('') : '') +
+      '<p class="sub">Todas as linhas</p>' + LINHAS.map(opcaoHTML).join('');
+    return;
+  }
+  const partes = termo.split(/\s+/);
+  const achadas = LINHAS.filter(l => {
+    const t = semAcento(`${l.codigo} ${l.nomeDisplay} ${l.origem} ${l.via} ${l.destino}`);
+    return partes.every(p => t.includes(p));
+  });
+  el.innerHTML = achadas.length ? achadas.map(opcaoHTML).join('') : '<p class="nada">Nenhuma linha com esse nome.<br>Tente outro pedaço do nome do bairro.</p>';
+}
+function selecionar(id) {
+  linhaId = id;
+  guardar('linha', id);
+  guardar('recentes', [id, ...ler('recentes', []).filter(x => x !== id)].slice(0, 3));
+  fecharEscolha();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Início
+(function () {
+  const salvo = ler('linha', null);
+  if (salvo && LINHAS.some(l => l.id === salvo)) linhaId = salvo;
+  guardar('diaManual', null);
+  render();
+  if (!linhaId) abrirEscolha();
+  setInterval(render, 15000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+})();
+</script>
+</body>
+</html>
