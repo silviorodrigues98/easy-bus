@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /
+
+# Exceções para indexação (caso queira permitir partes específicas no futuro)
+# Allow: /index.html
