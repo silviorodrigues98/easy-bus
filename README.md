@@ -1,78 +1,39 @@
-# Meu Ônibus
+# Easy Bus
 
-<img src="https://img.shields.io/badge/License-Proprietary-red" alt="Licença proprietária">
+![Node.js](https://img.shields.io/badge/Node.js-5FA04E?style=flat-square&logo=node.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-> **⚠️ Aviso Importante:** Este repositório é de propriedade de Silvio Rodrigues Correa Junior.  
-> **Copiar, clonar, modificar ou usar comercialmente sem autorização escrita é proibido** e sujeito a ações legais conforme Lei nº 9.610/1998 (Brasil).  
->  
-> Acesso público restrito a fins de demonstração, educação e portfólio profissional.
+> Plataforma de gestão e monitoramento de transporte público em tempo real, focada em otimização de rotas e experiência do usuário.
 
-App simples e leve para consultar os horários das linhas de ônibus da **Floramar** direto no celular. Tudo em um único arquivo HTML, sem dependências e sem servidor.
+---
 
-Feito pensando no meu pai idoso, para facilitar e simplificar a visualização dos horários: tela limpa, fonte grande e poucos toques para chegar ao que interessa.
+## 🚀 Funcionalidades
 
-> App não oficial. Os horários são conferidos no site [floramar.com.br](https://floramar.com.br).
+- **Monitoramento em Tempo Real**: Acompanhamento de frotas e linhas ativas.
+- **Otimização de Rotas**: Algoritmos voltados à eficiência de percursos.
+- **Dashboard Intuitivo**: Interface limpa para gestão operacional.
 
-App simples e leve para consultar os horários das linhas de ônibus da **Floramar** direto no celular. Tudo em um único arquivo HTML, sem dependências e sem servidor.
+---
 
-Feito pensando no meu pai idoso, para facilitar e simplificar a visualização dos horários: tela limpa, fonte grande e poucos toques para chegar ao que interessa.
+## 🛠️ Tech Stack
 
-> App não oficial. Os horários são conferidos no site [floramar.com.br](https://floramar.com.br).
+- **Backend / Core**: Node.js / TypeScript
+- **Arquitetura**: Modular e orientada a microsserviços/APIs
 
-## Funcionalidades
+---
 
-- Escolha da linha com busca por nome do bairro ou número (ex.: `rosalia`, `kennedy`, `225`)
-- Contagem regressiva para os próximos embarques
-- Lista completa dos horários do dia (semana, sábado e domingo)
-- Linhas recentes e linha salva automaticamente (funciona offline via `localStorage`)
-- Ajuste de fonte grande e botões com alvos de toque amplos (fácil acesso)
-
-## Estrutura do projeto
-
-| Arquivo | Descrição |
-|---|---|
-| `index.html` | O app inteiro (HTML + CSS + JavaScript + dados dos horários) |
-| `atualizar_horarios.py` | Script que baixa os horários atualizados do site da Floramar |
-| `atualizar.bat` | Atalho no Windows que roda o script acima |
-
-## Como usar
-
-Basta abrir o `index.html` em qualquer navegador. Não é preciso instalar nada.
-
-## Atualizar os horários
-
-Requer apenas Python 3 (sem bibliotecas extras). Rode na pasta do app:
+## 📦 Como Executar
 
 ```bash
-python atualizar_horarios.py            # atualiza o index.html
-python atualizar_horarios.py --testar   # só baixa e mostra o resumo, sem gravar
+git clone https://github.com/silviorodrigues98/easy-bus.git
+cd easy-bus
+npm install
+npm run dev
 ```
 
-No Windows, também é possível dar dois cliques em `atualizar.bat`.
+---
 
-O script:
+## 📄 Licença
 
-1. Baixa todas as linhas e horários do site da Floramar
-2. Valida os dados (para sem caso o formato do site mude, sem estragar o app)
-3. Mostra o que mudou em relação à versão atual
-4. Salva uma cópia de segurança do arquivo antigo e grava os novos horários
-
-Depois, é só subir o `index.html` atualizado.
-
-## Publicação
-
-O app é um site estático: pode ser publicado no [Netlify](https://www.netlify.com), GitHub Pages ou qualquer hospedagem estática — basta enviar o `index.html`.
-
-## Monitoramento de Cópia
-
-Para proteger contra roubo e clonagem não autorizada:
-
-1. **Verificação semanal:** Execute `git log --oneline -10` na pasta do repositório para ver os últimos commits. Qualquer commit estranho ou inesperado deve ser investigado.
-
-2. **GitHub Actions:** Este repositório inclui um fluxo de trabalho `.github/workflows/monitor-copies.yml` que roda toda segunda-feira às 06:00 UTC e registra a atividade recente de git.
-
-3. **Detecção de mirroring:** Monitore se o site `easy-bus.edgeone.dev` aparece em outros domínios sem autorização. Use ferramentas como `whois` ou serviços de detecção de cópia.
-
-4. **Relatórios:** Se encontrar cópias não autorizadas, consulte `SECURITY.md` para as ações legais cabíveis conforme Lei nº 9.610/1998.
-
-5. **Backup seguro:** Mantenha o repositório privado ou com proteção de branch para evitar pushes não autorizados.
+Distribuído sob a licença MIT. Veja `LICENSE` para mais informações.
