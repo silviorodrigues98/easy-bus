@@ -2,9 +2,12 @@
 
 ![Node.js](https://img.shields.io/badge/Node.js-5FA04E?style=flat-square&logo=node.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)
+![EdgeOne](https://img.shields.io/badge/EdgeOne-000000?style=flat-square&logo=tencentcloud&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
 > Plataforma de gestão e monitoramento de transporte público em tempo real, focada em otimização de rotas e experiência do usuário.
+
+🔗 **[Acessar Aplicação (Live Demo)](https://easy-bus.edgeone.dev/)**
 
 ---
 
@@ -20,6 +23,7 @@
 
 - **Backend / Core**: Node.js / TypeScript
 - **Arquitetura**: Modular e orientada a microsserviços/APIs
+- **Deploy**: EdgeOne Pages
 
 ---
 
